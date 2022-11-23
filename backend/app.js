@@ -13,6 +13,7 @@ const employeeRouter = require("./app/routes/employee.route");
 const scheduleWorkRouter = require("./app/routes/schedule-work.route");
 const examVoucherRouter = require("./app/routes/exam-voucher.route");
 const dateRouter = require("./app/routes/date.route");
+const accountRouter = require("./app/routes/account.route");
 
 const app = express();
 app.use(cors());
@@ -30,6 +31,7 @@ app.use("/api/employees", employeeRouter);
 app.use("/api/schedule_works", scheduleWorkRouter);
 app.use("/api/exam_vouchers", examVoucherRouter);
 app.use("/api/dates", dateRouter);
+app.use("/api/accounts", accountRouter);
 
 
 // simple route

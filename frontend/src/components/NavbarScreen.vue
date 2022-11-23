@@ -63,7 +63,7 @@
           <i class="bi bi-box-arrow-in-right ml-5 mr-5 text-lg mt-0.5"></i>
           <span>Setting</span>
         </a>
-        <a class="flex items-center p-2 text-sky-700 hover:bg-sky-500 text-sm hover:text-white">
+        <a @click="logout()" class="flex items-center p-2 text-sky-700 hover:bg-sky-500 text-sm hover:text-white">
           <i class="bi bi-box-arrow-in-right ml-5 mr-5 text-lg mt-0.5"></i>
           <span>Logout</span>
         </a>
@@ -83,6 +83,9 @@ export default {
     showUsers() {
       this.usersToggle = !this.usersToggle;
     },
+    logout() {
+      this.$emit('logout', false);
+    }
   },
 };
 </script>

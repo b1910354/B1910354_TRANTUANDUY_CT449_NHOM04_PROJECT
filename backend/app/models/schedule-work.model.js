@@ -8,7 +8,7 @@ const scheduleWorkSchema = new mongoose.Schema({
     },
     note: {
         type: String,
-        required: true,
+        required: false,
         trim: true,
         uppercase: true
     },
@@ -24,7 +24,7 @@ const scheduleWorkSchema = new mongoose.Schema({
     }],
     shifts: [{
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
+        required: false,
         ref: "Shift"
     }]
     ,

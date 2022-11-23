@@ -8,5 +8,6 @@ router.route("/")
 
 router.route("/:id")
     .get(scheduleWorks.find)
+    .delete(scheduleWorks.delete)
 
 module.exports = router;

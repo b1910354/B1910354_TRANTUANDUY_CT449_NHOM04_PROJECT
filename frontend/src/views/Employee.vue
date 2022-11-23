@@ -44,7 +44,7 @@
     </div>
 </template>
 
-<script>
+<script >
 import Search from "../components/Search.vue";
 import Button from "../components/Button.vue";
 import Table from "../components/Table.vue";

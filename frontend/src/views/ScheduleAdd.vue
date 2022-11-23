@@ -72,7 +72,13 @@
                         </span>
                         <Sort />
                     </th>
-                    <th class="border border-solid border-l-0 border-r-0 border-slate-500 py-2 pl-2 pr-2 relative w-28">
+                    <th class="border border-solid border-l-0 border-r-0 border-slate-500 py-2 pl-2 pr-2 relative">
+                        <span class="float-left">
+                            Note
+                        </span>
+                        <Sort />
+                    </th>
+                    <th class="border border-solid border-l-0 border-r-0 border-slate-500 py-2 pl-2 pr-2 relative w-18">
                         <span class="float-left">
                             Add
                         </span>
@@ -82,8 +88,8 @@
             <tbody>
                 <tr class="text-slate-700 text-lg lowercase" v-for="(value, index1) in setPages" :key="index1">
                     <td class="border border-solid border-l-0 border-r-0 border-slate-300 p-2">
-                        <input v-model="value.status" class="border border-solid border-pink-500 checked:bg-pink-500" type="checkbox" name=""
-                            id="">
+                        <input v-model="value.status" class="border border-solid border-pink-500 checked:bg-pink-500"
+                            type="checkbox" name="" id="">
                     </td>
                     <td class="border border-solid border-l-0 border-r-0 border-slate-300 p-2">
                         {{ value.dentistName }}
@@ -112,6 +118,9 @@
                         </span>
                     </td>
                     <td class="border border-solid border-l-0 border-r-0 border-slate-300 p-2">
+                        <input type="text" name="" id="" v-model="value.note" placeholder="enter note">
+                    </td>
+                    <td class="border border-solid border-l-0 border-r-0 border-slate-300 p-2">
                         <span @click="onSubmit()"
                             class="material-symbols-outlined text-xl cursor-pointer px-2 py-1 border border-solid border-blue-500 hover:bg-blue-500 hover:text-white">
                             add
@@ -120,7 +129,7 @@
                 </tr>
                 <p></p>
             </tbody>
-        </table>{{ newSchedule }}
+        </table>
         <!-- <span v-if="formatSchedule(setPages)[0] == 0" class="flex justify-center py-4 text-slate-700">No matching
             records found</span> -->
         <!-- !Table -->
@@ -144,6 +153,8 @@ import Button from "../components/Button.vue";
 import Pagination from "../components/Pagination.vue";
 import Schedule from "../services/schedule-work.service";
 import Employee from "../services/employee.service";
+import Datee from "../services/date.service";
+import Swal from "sweetalert2";
 
 export default {
     components: {
@@ -170,6 +181,7 @@ export default {
             searchText: "",
             employees: [],
             newSchedule: [],
+            dateList: [],
         }
     },
     watch: {
@@ -182,9 +194,9 @@ export default {
         },
         async idDeleteItem() {
         },
-        newCustomer() {
-            this.createCustomer();
-        }
+        // newCustomer() {
+        //     this.createCustomer();
+        // }
     },
     computed: {
         toString() {
@@ -240,33 +252,49 @@ export default {
             const date = new Date();
             return date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
         },
+        formatDate1(date1) {
+            const date = new Date(date1);
+            return date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+        },
         formatTime(date) {
             const temp = new Date(date);
             return temp.getUTCHours() + ':' + temp.getMinutes();
         },
         getNewSchedule() {
+            console.log('start');
             this.newSchedule = this.employees.map(
                 (employee, index) => {
+                    console.log('start1');
+
                     var check = true;
                     for (var value of this.schedules) {
                         if (employee._id == value.employee._id && this.formatDate(value.date.date) == this.formatDate(this.dateValue)) {
+                            console.log('start3');
                             check = false;
                             break;
                         }
                     }
                     if (check) {
+                        console.log('start2');
                         return {
-                            detistId: employee._id,
+                            dentistId: employee._id,
                             dentistName: employee.name,
                             phone: employee.phone,
                             email: employee.email,
                             date: this.dateValue,
                             shifts: [false, false, false, false],
                             status: false,
+                            note: ""
                         }
                     }
                 }
             )
+            this.newSchedule = this.newSchedule.filter(
+                (value, index) => {
+                    return value != undefined;
+                }
+            )
+            console.log(this.newSchedule);
             return this.newSchedule;
         },
         async getAllSchedule() {
@@ -286,25 +314,132 @@ export default {
         },
 
         convertShifts() {
-            for(var value of this.newSchedule) {
-                // if(value.shifts)
+            for (var value of this.newSchedule) {
+                if (value.shifts[0] == true) value.shifts[0] = this.shifts[0]._id;
+                if (value.shifts[1] == true) value.shifts[1] = this.shifts[1]._id;
+                if (value.shifts[2] == true) value.shifts[2] = this.shifts[2]._id;
+                if (value.shifts[3] == true) value.shifts[3] = this.shifts[3]._id;
             }
         },
 
         onSubmit() {
-            const body = this.newSchedule.map(
+            var check = false;
+            this.convertShifts();
+            var body = this.newSchedule.map(
                 (value, index) => {
-                    if(value.status) {
-                        for (var shift of this.shifts) {
-                            
+                    if (value.status) {
+                        check = true;
+                        const temp = value.shifts.filter(
+                            (shift, index) => {
+                                return shift != false;
+                            }
+                        )
+                        return {
+                            employee: value.dentistId,
+                            name: value.dentistName,
+                            date: value.date,
+                            note: value.note,
+                            shifts: temp
                         }
                     }
                 }
             )
-        }
+            body = body.filter(
+                (value, index) => {
+                    return value != undefined;
+                }
+            )
+            if (check) {
+                this.createSchedule(body);
+            }
+        },
 
+        async getAllDates() {
+            try {
+                this.dateList = await Datee.getAll();
+            } catch (error) {
+                console.log(error);
+            };
+
+        },
+
+        async createSchedule(data) {
+            var check = false;
+            for (var e of data) {
+                var dateObject = null;
+                var error = false;
+                try {
+                    dateObject = await Datee.create({ date: this.formatDate1(e.date) });
+                    await this.getAllDates();
+                } catch (error) {
+                    console.log(error);
+                };
+                console.log(dateObject);
+                try {
+                    if (e.note.length == 0 && e.shifts.length == 0) {
+                        error = true;
+                    } else if (e.note.length == 0) {
+                        await Schedule.create({
+                            employee: e.employee,
+                            date: dateObject._id,
+                            shifts: e.shifts,
+                        });
+                        check = true;
+                    } else if (e.shifts.length == 0) {
+                        await Schedule.create({
+                            employee: e.employee,
+                            date: dateObject._id,
+                            note: e.note,
+                        });
+                        check = true;
+                    } else {
+                        await Schedule.create({
+                            employee: e.employee,
+                            date: dateObject._id,
+                            shifts: e.shifts,
+                            note: e.note,
+                        });
+                        check = true;
+                    }
+
+                } catch (err) {
+                    console.log(err);
+                }
+                if (error) {
+                    const option = Swal.fire({
+                        background: "white",
+                        color: "black",
+                        icon: "error",
+                        title: "Dentist" + " " + e.name,
+                        text: "Shift or Note must have a valid ?",
+                        showCancelButton: true,
+                        cancelButtonText: "STOP",
+                        showConfirmButton: true,
+                        confirmButtonText: "CONTINUE",
+                        reverseButtons: true,
+                    });
+                    if ((await option).isConfirmed) {
+                        continue;
+                    } else {
+                        break;
+                    }
+                }
+            }
+            if (check) {
+                Swal.fire({
+                    background: "white",
+                    color: "black",
+                    icon: "success",
+                    text: "Successfully asigned"
+                });
+                await this.getAllSchedule();
+                await this.getAllEmployee();
+                await this.getNewSchedule();
+            }
+        }
     },
     async created() {
+        await this.getAllDates();
         await this.getAllShifts();
         await this.getAllSchedule();
         await this.getAllEmployee();

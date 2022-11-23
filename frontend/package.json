@@ -16,9 +16,11 @@
     "axios": "^1.1.2",
     "bootstrap": "^5.2.2",
     "bootstrap-icons": "^1.9.1",
+    "chart.js": "^3.9.1",
     "sweetalert2": "^11.6.9",
     "vee-validate": "^4.7.1",
     "vue": "^3.2.38",
+    "vue-chartjs": "^4.1.2",
     "vue-router": "^4.1.5",
     "yup": "^0.32.11"
   },

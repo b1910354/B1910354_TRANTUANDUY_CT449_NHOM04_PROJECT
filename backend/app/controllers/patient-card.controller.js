@@ -106,7 +106,7 @@ exports.findAll = async (req, res, next) => {
 
 exports.find = async (req, res, next) => {
     try{
-        const document = await PatientCard.findById({_id: req.params.id}).populate().exec();
+        const document = await PatientCard.findById({_id: req.params.id}).populate("examVoucher").exec();
         return res.send(document);
     }catch(err) {
         return next(

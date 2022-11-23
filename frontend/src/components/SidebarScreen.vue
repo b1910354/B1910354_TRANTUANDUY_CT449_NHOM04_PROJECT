@@ -107,18 +107,18 @@ export default {
                     name: "Schedule",
                     active: false,
                 },
-                {
-                    id: 3,
-                    icon: "bi bi-earbuds",
-                    name: "Activity",
-                    active: false,
-                },
-                {
-                    id: 4,
-                    icon: "bi bi-currency-dollar",
-                    name: "Invoice",
-                    active: false,
-                },
+                // {
+                //     id: 3,
+                //     icon: "bi bi-earbuds",
+                //     name: "Activity",
+                //     active: false,
+                // },
+                // {
+                //     id: 4,
+                //     icon: "bi bi-currency-dollar",
+                //     name: "Invoice",
+                //     active: false,
+                // },
                 {
                     id: 5,
                     icon: "bi bi-person-badge",

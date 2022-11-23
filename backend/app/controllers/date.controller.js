@@ -18,12 +18,10 @@ exports.create = async (req, res, next) => {
             date: new Date(req.body.date),
         });
         const date = await DateWork.find({date: req.body.date}).exec();
+        const date1 = await DateWork.findOne({date: req.body.date}).exec();
 
         if(date.length) {
-            return res.send({
-                message: "Date already exists",
-                content: date
-            });
+            return res.send(date1);
         }
 
         try {

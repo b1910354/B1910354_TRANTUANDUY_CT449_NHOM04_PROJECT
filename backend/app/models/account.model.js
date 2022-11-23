@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const accountSchema = new mongoose.Schema({
-  username: {
+  email: {
     type: String,
     required: true,
     uppercase: true,
@@ -12,11 +12,11 @@ const accountSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  employee: {
-    type: mongoose.Schema.Types.ObjectId,
-    require: true,
-    ref: "Employee"
-  }
+  // employee: {
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   require: true,
+  //   ref: "Employee"
+  // }
 });
 
 module.exports = mongoose.model('Account', accountSchema);

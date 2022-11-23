@@ -1,7 +1,7 @@
 import createApiClient from "./api.service";
 
 class InstitutionService {
-  constructor(baseUrl = "/api/dates") {
+  constructor(baseUrl = "/api/accounts") {
     this.api = createApiClient(baseUrl);
   }
   async getAll() {

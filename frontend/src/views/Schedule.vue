@@ -32,7 +32,7 @@
                 <Search class="mx-2 w-96" v-model="searchText"></Search>
                 <!-- !Add -->
                 <Button>
-                    <router-link :to="{name: 'Schedule.add'}">
+                    <router-link :to="{ name: 'Schedule.add' }">
                         <i class="bi bi-plus-lg mr-2 text-md"></i>
                         <span>Assign</span>
                     </router-link>
@@ -74,6 +74,12 @@
                         </span>
                         <Sort />
                     </th>
+                    <th class="border border-solid border-l-0 border-r-0 border-slate-500 py-2 pl-2 pr-2 relative">
+                        <span class="float-left">
+                            Note
+                        </span>
+                        <Sort />
+                    </th>
                     <th class="border border-solid border-l-0 border-r-0 border-slate-500 py-2 pl-2 pr-2 relative w-28">
                         <span class="float-left">
                             Actions
@@ -82,12 +88,11 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-if="formatSchedule(setPages)[0] != 0" class="text-slate-700 text-lg lowercase"
-                    v-for="(value, index) in formatSchedule(setPages)" :key="index">
+                <tr class="text-slate-700 text-lg lowercase" v-for="(value, index) in setPages" :key="index">
                     <td class="border border-solid border-l-0 border-r-0 border-slate-300 p-2">
                         {{ value.date }}
                     </td>
-                    <td class="border border-solid border-l-0 border-r-0 border-slate-300 p-2">
+                    <td v-if="value.shift.length != 0" class="border border-solid border-l-0 border-r-0 border-slate-300 p-2">
                         <span v-for="(shift, index) in value.shift" class="flex flex-col">
                             <span v-if="index == 0" class="text-blue-500">{{ shift.name }} {{ formatTime(shift.start) }}
                                 -
@@ -100,6 +105,9 @@
                                 {{ formatTime(shift.end) }}</span>
                         </span>
                     </td>
+                    <td v-if="value.shift.length == 0" class="border border-solid border-l-0 border-r-0 border-slate-300 p-2">
+                        <span class="bg-yellow-500 px-16">&emsp;</span>
+                    </td>
                     <td class="border border-solid border-l-0 border-r-0 border-slate-300 p-2">
                         {{ value.dentist }}
                     </td>
@@ -109,6 +117,11 @@
                     <td class="border border-solid border-l-0 border-r-0 border-slate-300 p-2">
                         {{ value.email }}
                     </td>
+                    <td class="border border-solid border-l-0 border-r-0 border-slate-300 p-2"
+                    :class="[compareString(value.note, 'no') ? '' : 'text-yellow-500']"
+                    >
+                        {{ value.note }}
+                    </td>
                     <td class="border border-solid border-l-0 border-r-0 border-slate-300 p-2">
                         <span class="material-symbols-outlined text-xl hover:text-blue-500 cursor-pointer">
                             visibility
@@ -116,7 +129,8 @@
                         <span class="material-symbols-outlined text-xl mx-4 hover:text-yellow-500 cursor-pointer">
                             edit
                         </span>
-                        <span class="material-symbols-outlined text-xl hover:text-red-500 cursor-pointer">
+                        <span @click="deleteSchedule(value.id, value.dentistId)"
+                            class="material-symbols-outlined text-xl hover:text-red-500 cursor-pointer">
                             delete
                         </span>
                     </td>
@@ -124,14 +138,13 @@
                 <p></p>
             </tbody>
         </table>
-        <span v-if="formatSchedule(setPages)[0] == 0" class="flex justify-center py-4 text-slate-700">No matching
+        <span v-if="setPages.length == 0" class="flex justify-center py-4 text-slate-700">No matching
             records found</span>
         <!-- !Table -->
         <!-- !Pagination -->
         <Pagination :numberOfPages="numberOfPages" :totalRow="totalRow" :startRow="startRow" :endRow="endRow"
             v-model:currentPage="currentPage"></Pagination>
         <!-- !Pagination -->
-
     </div>
 </template>
 
@@ -142,6 +155,9 @@ import Search from "../components/Search.vue";
 import Button from "../components/Button.vue";
 import Pagination from "../components/Pagination.vue";
 import Schedule from "../services/schedule-work.service";
+import Sort from "../components/Sort.vue";
+import Swal from "sweetalert2";
+import Employee from "../services/employee.service";
 
 export default {
     components: {
@@ -149,6 +165,7 @@ export default {
         Search,
         Button,
         Pagination,
+        Sort
     },
     data() {
         return {
@@ -158,6 +175,7 @@ export default {
             shiftValue: "All",
             dateValue: null,
             schedules: [],
+            scheduleList: [],
             totalRow: 0,
             currentPage: 1,
             startRow: 0,
@@ -165,6 +183,8 @@ export default {
             numberOfPages: 1,
             idDeleteItem: "",
             searchText: "",
+            employee: {},
+
         }
     },
     watch: {
@@ -173,6 +193,7 @@ export default {
         },
         async dateValue() {
             await this.getAllSchedule();
+            await this.formatSchedule();
         },
         async idDeleteItem() {
         },
@@ -182,14 +203,14 @@ export default {
     },
     computed: {
         toString() {
-            return this.schedules.map(
+            return this.scheduleList.map(
                 (value) => {
-                    return [value.employee.name, value.employee.phone, value.employee.email].join("");
+                    return [value.dentist, value.phone, value.email].join("");
                 }
             )
         },
         filter() {
-            return this.schedules.filter(
+            return this.scheduleList.filter(
                 (value, index) => {
                     return this.toString[index].includes(this.searchText.toUpperCase());
                 }
@@ -197,8 +218,8 @@ export default {
         },
         filtered() {
             if (!this.searchText) {
-                this.totalRow = this.schedules.length;
-                return this.schedules;
+                this.totalRow = this.scheduleList.length;
+                return this.scheduleList;
             } else {
                 this.totalRow = this.filter.length;
             }
@@ -234,8 +255,8 @@ export default {
             const temp = new Date(date);
             return temp.getUTCHours() + ':' + temp.getMinutes();
         },
-        formatSchedule(schedules) {
-            return schedules.map(
+        formatSchedule() {
+            var temp = this.schedules.map(
                 (value, index) => {
                     if (this.dateValue != null) {
                         if (this.formatDate(this.dateValue) == this.formatDate(value.date.date)) {
@@ -244,8 +265,10 @@ export default {
                                 shift: value.shifts,
                                 dentist: value.employee.name,
                                 phone: value.employee.phone,
+                                dentistId: value.employee._id,
                                 id: value._id,
                                 email: value.employee.email,
+                                note: value.note,
                             }
                         }
                         return 0;
@@ -254,12 +277,23 @@ export default {
                         date: this.formatDate(value.date.date),
                         shift: value.shifts,
                         dentist: value.employee.name,
+                        dentistId: value.employee._id,
                         phone: value.employee.phone,
                         id: value._id,
                         email: value.employee.email,
+                        note: value.note,
                     }
                 }
             )
+
+            temp = temp.filter(
+                (value) => value != 0
+            );
+
+            this.scheduleList = temp;
+
+            console.log(temp);
+            return temp;
         },
         async getAllSchedule() {
             try {
@@ -267,13 +301,58 @@ export default {
             } catch (error) {
                 console.log(error);
             };
+        },
 
+        async getEmployee(id) {
+            try {
+                this.employee = await Employee.get(id);
+            } catch (error) {
+                console.log(error);
+            }
+        },
+
+        async deleteSchedule(id, idE) {
+            await this.getEmployee(idE);
+            const option = Swal.fire({
+                background: "white",
+                color: "black",
+                icon: "warning",
+                text: "You want to delete " + this.employee.name + "'s " + "work schedule",
+                showCancelButton: true,
+                showCancelButton: true,
+                cancelButtonText: "Cancel",
+                confirmButtonText: "Delete",
+                confirmButtonColor: "red",
+                reverseButtons: true,
+            });
+            if ((await option).isConfirmed) {
+                try {
+                    await Schedule.delete(id);
+                    Swal.fire({
+                        background: "white",
+                        color: "black",
+                        icon: "success",
+                        text: "Successfully deleted"
+                    });
+                    await this.getAllSchedule();
+                    await this.formatSchedule();
+                } catch (error) {
+                    console.log(error);
+                };
+            }
+        },
+
+        
+
+        compareString(a, b) {
+            return a.toLowerCase().includes(b);
         }
 
     },
-    created() {
-        this.getAllShifts();
-        this.getAllSchedule();
+    async created() {
+        await this.getAllShifts();
+        await this.getAllSchedule();
+        await this.formatSchedule();
     }
 }
 </script>
