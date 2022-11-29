@@ -1,5 +1,5 @@
 <template>
-    <table class="border-collapse table-fixed bg-white" style="width: 100%">
+    <table class="border-collapse table-auto bg-white" style="width: 100%">
         <thead class="">
             <tr class="bg__light text-slate-900 text-base uppercase">
                 <th

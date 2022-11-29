@@ -9,8 +9,8 @@
                     <option v-for="(per_page, index) in perPageList" :key="index">{{ per_page }}</option>
                 </select>
             </div>
+            <Search class="flex-1 mx-40 w-96" v-model="searchText" />
             <div class="flex items-center">
-                <Search class="mx-2 w-96" v-model="searchText" />
                 <Button @click="activeAdd = true">
                     <i class="bi bi-plus-lg mr-2 text-sm"></i>
                     <span>Add Customer</span>

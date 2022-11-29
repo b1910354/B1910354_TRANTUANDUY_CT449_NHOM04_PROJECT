@@ -7,12 +7,12 @@
             <div class="flex justify-start">
                 <img class="w-60" src="../assets/images/logo.png" alt="" />
             </div>
-            <span class="mt-5 ml-4 text-xl font-black"><span>Welcome to</span> <span class="text-blue-500">HE THONG QUAN
-                    LY NHA KHOA</span></span>
-            <span class="material-symbols-outlined animate-bounce mt-5 text-3xl">
+            <span class="mt-5 ml-4 text-xl font-black"><span>Welcome to</span></span>
+            <span class="text-blue-500 text-3xl mt-5">DENTAL MANAGERMENT SYSTEM</span>
+            <!-- <span class="material-symbols-outlined animate-bounce mt-5 text-3xl">
                 front_hand
-            </span>
-            <span class="ml-4 mt-2">Please sign-in to your account and start the adventure</span>
+            </span> -->
+            <!-- <span class="ml-4 mt-2">Please sign-in to your account and start the adventure</span> -->
             <Form class="flex flex-col mx-4" @submit="onSubmit()" :validation-schema="formSchema">
                 <div class="flex flex-col mt-10 mb-5">
                     <label for="email" class="mb-2 font-black text-lg">Email</label>
@@ -27,7 +27,7 @@
                     <ErrorMessage class="ml-2 mt-2 text-red-500" name="password" />
                 </div>
                 <div class="flex flex-col mt-10">
-                    <input type="submit" value=""
+                    <input type="submit" value="Login"
                         class="w-96 border border-solid rounded-md py-2 border-violet-500 text-violet-500 text-xl hover:bg-violet-500 hover:text-white cursor-pointer">
                 </div>
             </Form>

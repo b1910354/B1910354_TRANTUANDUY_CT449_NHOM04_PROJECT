@@ -51,8 +51,8 @@ export default {
 
 <template>
   <div class="w-full">
-    <Login v-if="!checkLogin" @submit="value => user = value" />
-    <div v-if="checkLogin" class="flex flex-row">
+    <!-- <Login v-if="!checkLogin" @submit="value => user = value" /> -->
+    <div v-if="!checkLogin" class="flex flex-row">
       <div class="basis-1/12 relative z-30">
         <SideBarScreen v-model:activeIndex="activeIndex" />
       </div>

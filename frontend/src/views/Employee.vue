@@ -1,5 +1,5 @@
 <template>
-    <div class="" @dblclick="activeAction = !activeAction">
+    <div class="bg-white rounded-md" @dblclick="activeAction = !activeAction">
         <div class="flex flex-row justify-between items-center py-5 mx-2">
             <div class="flex flex-row items-center">
                 <div class="pr-2">Entries</div>
@@ -13,15 +13,26 @@
                     </option>
                 </select>
             </div>
+            <div class="flex items-center mx-20">
+                <div class="pr-2">Position</div>
+                <select v-model="positionValue"
+                    class="form-select rounded-md w-40 border border-solid border-1 border-sky-500">
+                    <option value="All">All</option>
+                    <option :value="`${value._id}`" v-for="(value, index) in positions">
+                        {{ value.name }}
+                    </option>
+                </select>
+            </div>
+            <Search class="flex-1 mr-20" v-model="searchText"></Search>
             <div class="flex items-center">
-                <Search class="mx-2 w-96" v-model="searchText"></Search>
+
                 <Button @click="activeAdd = true">
                     <i class="bi bi-plus-lg mr-2 text-md"></i>
                     <span>Add Employee</span>
                 </Button>
             </div>
         </div>
-        <Table :items="setPages" :fields="fields" :labels="labels" :actionList="actionList"
+        <Table :items="formatList(setPages)" :fields="fields" :labels="labels" :actionList="actionList"
             v-model:activeIndex="activeAction" @deleteItem="(id) => (idDeleteItem = id)">
         </Table>
         <Pagination :numberOfPages="numberOfPages" :totalRow="totalRow" :startRow="startRow" :endRow="endRow"
@@ -29,7 +40,7 @@
     </div>
     <!-- add employee -->
     <div v-if="activeAdd"
-        class="absolute top-0 right-0 w-screen h-screen z-50 overflow-auto shadow-xl opacity-100 flex">
+        class="absolute top-0 right-0 min-w-screen min-h-screen z-50 overflow-auto shadow-xl opacity-100 flex">
         <div class="flex-1 bg-slate-900 opacity-25"></div>
         <div class="flex flex-col bg-white w-96">
             <div class="flex flex-row justify-between items-center px-3 py-3 bg-sky-900 text-white text-lg">
@@ -46,6 +57,7 @@
 
 <script >
 import Search from "../components/Search.vue";
+import Select from "../components/Select.vue";
 import Button from "../components/Button.vue";
 import Table from "../components/Table.vue";
 import Pagination from "../components/Pagination.vue";
@@ -61,6 +73,7 @@ export default {
         Table,
         Pagination,
         Form,
+        Select,
     },
     data() {
         return {
@@ -69,8 +82,8 @@ export default {
             searchText: "",
             employees: [],
             employee: {},
-            fields: ["name", "gender", "phone number", "mail"],
-            labels: ["name", "gender", "phone", "email"],
+            fields: ["name", "gender", "phone number", "email", "position"],
+            labels: ["name", "gender", "phone", "email", "position"],
             activeAction: -1,
             totalRow: 0,
             currentPage: 1,
@@ -84,6 +97,7 @@ export default {
             diplomas: [],
             newEmployee: {},
             actionList: ["Employee.view", "Employee.edit"],
+            positionValue: "All",
         };
     },
     watch: {
@@ -103,6 +117,9 @@ export default {
         async newEmployee() {
             await this.createEmployee();
         },
+        async positionValue() {
+            await this.refreshList();
+        }
     },
     computed: {
         //return
@@ -151,6 +168,13 @@ export default {
         async retrieveEmployees() {
             try {
                 this.employees = await EmployeeService.getAll();
+                if (this.positionValue != "All") {
+                    this.employees = this.employees.filter(
+                        (value, index) => {
+                            return value.position._id == this.positionValue;
+                        }
+                    )
+                }
             } catch (err) {
                 console.log(err);
             }
@@ -245,6 +269,22 @@ export default {
                 console.log(err);
             }
         },
+        formatList(list) {
+            const temp = [];
+            for (var value of list) {
+                temp.push(
+                    {
+                        _id: value._id,
+                        name: value.name,
+                        gender: value.gender,
+                        phone: value.phone,
+                        email: value.email,
+                        position: value.position.name
+                    }
+                );
+            }
+            return temp;
+        }
     },
     mounted() {
         this.refreshList();
@@ -253,3 +293,4 @@ export default {
     },
 };
 </script>
+

@@ -187,7 +187,7 @@ exports.create = async (req, res, next) => {
 
 exports.findAll = async (req, res, next) => {
     try{
-        const employees = await Employee.find().populate("position").populate("diplomas").exec();
+        const employees = await Employee.find().populate("position").populate("diplomas").populate("scheduleWorks").exec();
         return res.send(employees);
     }catch (error) {
         return next(

@@ -1,6 +1,6 @@
 <template>
     <div class="flex justify-between py-5 px-2 items-center">
-        <p class="text-slate-900">Showing {{startRow}} to {{endRow>totalRow ? totalRow : endRow}} of {{totalRow}} entries</p>
+        <p class="text-slate-900">Showing {{totalRow ==0 ? 0 : startRow}} to {{endRow>totalRow ? totalRow : endRow}} of {{totalRow}} entries</p>
         <div class="flex items-center">
             <a class="bg-sky-100 rounded-full w-8 h-8 flex items-center justify-center hover:bg-sky-500 hover:text-white" href="#"
             @click="updatePagePrev(currentPage)"

@@ -90,7 +90,7 @@
                         <td class=" p-2">
                             {{ item.expression }}
                         </td>
-                        <td class=" p-2">
+                        <td class=" p-2">{{item.scheduleWork}}
                             {{ getIdSchedule(item.scheduleWork) }}{{ dateExam }}
                         </td>
                         <td class=" p-2">
@@ -193,8 +193,8 @@ export default {
         }
     },
     watch: {
-        idSchedule() {
-            this.getScheduleWork(this.idSchedule);
+        async idSchedule() {
+            await this.getScheduleWork(this.idSchedule);
         },
         async add() {
             await this.createEV();
